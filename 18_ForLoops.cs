@@ -77,4 +77,103 @@ namespace Code
             return numOfRectangles;
         }
     }
+
+
+    public static class Transpose
+    {
+        public static string String(string input)
+        {
+            //Detectamos los finales de línea
+
+            int fila = 0;
+            int columna = 0;
+            int maxColumna = 0;
+
+            string resultString = "";
+
+            //Dimensiones de la matriz
+            foreach (char c in input)
+            {
+                if (c == '\n')
+                {
+                    fila++;
+                    columna = 0;
+                    continue;
+                }
+
+                columna++;
+                if (columna > maxColumna)
+                {
+                    maxColumna = columna;
+                }
+            }
+
+            fila++;
+
+            //Generamos matriz de esas dimensiones
+            char[,] transposedCharacters = new char[maxColumna, fila];
+
+            int auxFila = 0;
+            int auxColumna = 0;
+
+            //Guardamos valores en la matriz
+            foreach (char c in input)
+            {
+                if (c == '\n')
+                {
+                    auxFila++;
+                    auxColumna = 0;
+                    continue;
+                }
+
+                transposedCharacters[auxColumna, auxFila] = c;
+                auxColumna++;
+            }
+
+            //Generamos el string solución
+            for (int i = 0; i < maxColumna; i++)
+            {
+                for (int j = 0; j<fila; j++)
+                {
+                    if (transposedCharacters[i, j] != '\0')
+                    {
+                        while (resultString.Length - resultString.LastIndexOf('\n') <= j)
+                        {
+                            resultString +=' ';
+                        }
+                        resultString += transposedCharacters[i, j];
+                    }
+                }
+                resultString += "\n";
+            }
+
+            if (resultString.Length > 0)
+            {
+                resultString = resultString.Remove(resultString.Length - 1);
+                resultString = resultString.Trim();
+            }
+
+
+            return resultString;
+        }
+
+
+        //Solución de la comunidad
+        //public static string String(string input)
+        //{
+        //    var rows = input.Split('\n');
+        //    var maxLineLength = rows.Max(x => x.Length);
+        //    var transposed = new string[maxLineLength];
+        //    for (var i = 0; i < rows.Length; i++)
+        //    {
+        //        for (var j = 0; j < rows[i].Length; j++)
+        //            transposed[j] += rows[i][j];
+        //        var remainderRowsMaximumLength = rows.Skip(i).Max(x => x.Length);
+        //        for (var k = rows[i].Length; k < remainderRowsMaximumLength; k++)
+        //            transposed[k] += " ";
+        //    }
+
+        //    return string.Join("\n", transposed).TrimEnd();
+        //}
+    }
 }
