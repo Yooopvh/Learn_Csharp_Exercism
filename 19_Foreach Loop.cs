@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Code
 {
@@ -78,5 +80,31 @@ namespace Code
 
             return result;
         }
+
+
+        public static class FlattenArray
+        {
+            public static IEnumerable Flatten(IEnumerable input)
+            {
+                foreach (object element in input)
+                {
+                    if ( element is IEnumerable auxElement)
+                    {
+                        foreach (var nestedElement in Flatten(auxElement))
+                        {
+                            yield return nestedElement;
+                        }
+                    }
+                    else
+                    {
+                        if (element != null)
+                        {
+                            yield return element;
+                        }
+                    }
+                };
+            }
+        }
+
     }
 }
