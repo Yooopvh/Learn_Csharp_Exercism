@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Code
 {
@@ -78,6 +75,7 @@ namespace Code
         }
     }
 
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
 
     public static class Transpose
     {
@@ -175,5 +173,47 @@ namespace Code
 
         //    return string.Join("\n", transposed).TrimEnd();
         //}
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Luhn
+    {
+        public static bool IsValid(string number)
+        {
+            List<int> numbers = new List<int>();
+
+            StringBuilder stringBuilder = new StringBuilder();
+            //foreach (char c in number)
+            //{
+            //    if (c != ' ') { stringBuilder.Append(c); };
+            //}
+            //number = stringBuilder.ToString();
+            number = number.Replace(" ", "");
+            int i = number.Length%2 == 0 ? 0 : 1 ;
+            foreach (char c in number)
+            {
+                int newNumber = (i%2 == 0) ? (int)char.GetNumericValue(c)*2 : (int)char.GetNumericValue(c);
+                while (newNumber > 9){ newNumber -= 9; }
+                numbers.Add(newNumber);
+                i++;
+            }
+            int solution = 0;
+            if (numbers.Count == 1 && numbers[0] == 0) 
+            {
+                return false;
+            } else
+            {
+                foreach (int num in numbers)
+                {
+                    solution += num;
+                }
+
+                if (solution%10 ==0) { return true; } else { return false; }
+            }
+            
+
+            return numbers.Sum(x => x)%10 == 0 && (numbers.Sum(x =>x) > 0 || numbers.Count() > 1);
+        }  
     }
 }

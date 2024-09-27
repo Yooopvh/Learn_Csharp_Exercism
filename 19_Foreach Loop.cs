@@ -107,4 +107,55 @@ namespace Code
         }
 
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class AtbashCipher
+    {
+        public static string Encode(string plainValue)
+        {
+            StringBuilder sb = new StringBuilder();
+            plainValue = plainValue.ToLower();
+            int i = 0;
+            foreach (char c in plainValue)
+            {
+                if (i == 5)
+                {
+                    sb.Append(' ');
+                    i = 0;
+                }
+                if (char.IsLetter(c))
+                {
+                    int difference = c-'a';
+                    sb.Append((char)('z'- difference));
+                    i++;
+                }
+                else if (char.IsDigit(c))
+                {
+                    sb.Append(c);
+                    i++;
+                }
+            }
+            return sb.ToString().Trim();
+        }
+
+        public static string Decode(string encodedValue)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in encodedValue)
+            {
+                if (char.IsLetter(c))
+                {
+                    int difference = 'z'-c;
+                    sb.Append((char)('a' + difference));
+                }
+                else if (char.IsDigit(c))
+                {
+                    sb.Append(c);
+                }
+
+            }
+            return sb.ToString();
+        }
+    }
 }
