@@ -236,8 +236,7 @@ namespace Test
         public static string Abbreviate(string phrase)
         {
             StringBuilder stringBuilder = new StringBuilder();
-            bool nextLetterIsAcronim = false;
-            stringBuilder.Append(phrase[0]);
+            bool nextLetterIsAcronim = true;
             foreach (char c in phrase)
             {
                 if (nextLetterIsAcronim && char.IsLetter(c)) { stringBuilder.Append(char.ToUpper(c)); }
