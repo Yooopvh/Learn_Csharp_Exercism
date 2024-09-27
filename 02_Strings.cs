@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -196,6 +197,54 @@ namespace Test
             }
 
             return resultCode;
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class RotationalCipher
+    {
+        public static string Rotate(string text, int shiftKey)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (char c in text)
+            {
+                if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <='z'))
+                {
+                    char newLetter = (char) (c + shiftKey);
+                    newLetter = ((c >= 'A' && c <= 'Z') && newLetter > 'Z') ? (char)((int)'A' + (int)newLetter - (int)'Z'-1) : newLetter;
+                    newLetter = ((c >= 'a' && c <= 'z') && newLetter > 'z') ? (char)((int)'a' + (int)newLetter - (int)'z'-1) : newLetter;
+
+                    stringBuilder.Append(newLetter);
+                }
+                else
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString();
+        }
+
+    }
+
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Acronym
+    {
+        public static string Abbreviate(string phrase)
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+            bool nextLetterIsAcronim = false;
+            stringBuilder.Append(phrase[0]);
+            foreach (char c in phrase)
+            {
+                if (nextLetterIsAcronim && char.IsLetter(c)) { stringBuilder.Append(char.ToUpper(c)); }
+                nextLetterIsAcronim = (c == ' ' || c == '-'|| c == '_');
+            }
+
+            return stringBuilder.ToString();
         }
     }
 

@@ -83,5 +83,29 @@ namespace Test
 
             }
         }
+
+    }
+
+
+    public static class PrimeFactors
+    {
+        public static long[] Factors(long number)
+        {
+            List<long> result = new List<long>();
+
+            while (number > 1)
+            {
+                for (int i = 2; i <= number; i++)
+                {
+                    if ((number%i) == 0)
+                    {
+                        result.Add(i);
+                        number /= i;
+                        break;
+                    }
+                }
+            }
+            return result.ToArray();
+        }
     }
 }
