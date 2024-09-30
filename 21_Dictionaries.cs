@@ -175,4 +175,54 @@ namespace Code
             return result;
         }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class ParallelLetterFrequency
+    {
+        // Esta 
+        public static Dictionary<char, int> Calculate(IEnumerable<string> texts)
+        {
+            Dictionary<char,int> result = new Dictionary<char,int>();
+            Parallel.For('a', 'z', letterIndex =>
+            {
+                int num = texts.SelectMany(text => text.ToLower()).Count(x => ((char)letterIndex) == x);
+                if (num > 0)
+                {
+                    Console.WriteLine((char)letterIndex);
+                    try
+                    {
+                        result.Add((char)letterIndex, num);
+                    }
+                    catch
+                    {
+                    };
+                }
+                
+            });
+            Parallel.For('ß', 'ÿ', letterIndex =>
+            {
+                if (letterIndex != 247) //÷ symbol
+                {
+                    int num = texts.SelectMany(text => text.ToLower()).Count(x => ((char)letterIndex) == x);
+                    if (num > 0)
+                    {
+                        result.Add((char)letterIndex, num);
+                    }
+                }
+            });
+            return result;
+        }
+
+        //  SOLUCIÓN COMUNIDAD
+        //public static Dictionary<char, int> Calculate(IEnumerable<string> texts)
+        //{
+        //    return texts
+        //        .AsParallel()
+        //        .SelectMany(text => text.ToLower().Select(c => c))
+        //        .Where(c => char.IsLetter(c))
+        //        .GroupBy(c => c)
+        //        .ToDictionary(c => c.Key, c => c.Count());
+        //}
+    }
 }
