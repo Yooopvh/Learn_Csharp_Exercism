@@ -114,5 +114,35 @@ namespace Code
     //    }
     //}
 
+    //----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class IsbnVerifier
+    {
+        public static bool IsValid(string number)
+        {
+            int multiplier = 10;
+            int result = 0;
+            for(int i = 0; i < number.Length;i++)
+            {
+                if (char.IsDigit(number[i]))
+                {
+                    result += (int) char.GetNumericValue(number[i]) * multiplier;
+                    multiplier--;
+                } else if ((i == number.Length - 1 && number[i] == 'X'))
+                {
+                    result += 10;
+                    multiplier--;
+                } else if (number[i] == '-')
+                {
+                    //nothing
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return result%11 == 0 && multiplier == 0;
+        }
+    }
 
 }
