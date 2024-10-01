@@ -225,4 +225,155 @@ namespace Code
         //        .ToDictionary(c => c.Key, c => c.Count());
         //}
     }
+
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum Owner
+    {
+        None,
+        Black,
+        White 
+    }
+
+    public class GoCounting
+    {
+        private List<List<char>> board = new List<List<char>>();
+        int maxRow = 0;
+        int maxColumn = 0;
+        
+        public GoCounting(string input)
+        {
+            List<char> rowChars = new List<char>();
+            int row = 1; int col = 0;
+            foreach (char letter in input)
+            {
+                if (letter != '\n'){
+                    rowChars.Add(letter);
+                    col++;
+                    if (col > maxColumn) maxColumn = col;
+                } else
+                {
+                    board.Add(rowChars);
+                    rowChars = new List<char>();
+                    row++;
+                    col = 0;
+                }
+                if (row > maxRow) maxRow = row;
+            }
+            board.Add(rowChars);   
+        }
+
+        public Tuple<Owner, HashSet<(int, int)>> Territory((int, int) coord)
+        {
+            Tuple<Owner, HashSet<(int, int)>> result;
+            HashSet<(int, int)> occupiedCells = new HashSet<(int, int)> ();
+
+            if (coord.Item1 < 0 || coord.Item2 < 0 || coord.Item1 > maxColumn-1 || coord.Item2 > maxRow-1)
+            {
+                throw new ArgumentException();
+            }
+
+            List<(int,int)> itemsToStudy = new List<(int,int)> ();
+            if (board[coord.Item2][coord.Item1] == ' ')
+            {
+                itemsToStudy.Add(coord);
+            }
+            bool isValid = true;
+            char? ownerInStudy = null;
+            int i = 0;
+
+            while (itemsToStudy.Except(occupiedCells).ToList().Count() > 0 && itemsToStudy.Count() > 0)
+            {
+                (int,int) itemInStudy = itemsToStudy[i];
+                i++;
+                occupiedCells.Add(itemInStudy);
+
+                // Celda superior
+                checkCell(itemInStudy, 0, -1,ref isValid,ref ownerInStudy,ref itemsToStudy);
+                // Celda derecha
+                checkCell(itemInStudy, 1, 0, ref isValid, ref ownerInStudy, ref itemsToStudy);
+                // Celda inferior
+                checkCell(itemInStudy, 0, 1, ref isValid, ref ownerInStudy, ref itemsToStudy);
+                // Celda izquierda
+                checkCell(itemInStudy, -1, 0, ref isValid, ref ownerInStudy, ref itemsToStudy);
+
+
+                //if (!isValid) { break; }
+            }
+
+            Owner owner;
+            if (!isValid || ownerInStudy == null)
+            {
+                owner = Owner.None;
+            } else
+            {
+                if (ownerInStudy == 'W')
+                {
+                    owner = Owner.White;
+                } else
+                {
+                    owner = Owner.Black;
+                }
+            }
+
+            return new Tuple<Owner, HashSet<(int, int)>>(owner, occupiedCells);
+        }
+
+        public Dictionary<Owner, HashSet<(int, int)>> Territories()
+        {
+            Dictionary<Owner, HashSet<(int, int)>> result = new Dictionary<Owner, HashSet<(int, int)>> 
+            {
+                {Owner.Black, new HashSet<(int, int)>() },
+                {Owner.White, new HashSet<(int, int)>() },
+                {Owner.None, new HashSet<(int, int)>() }
+            };
+
+            for (int row = 0; row < maxColumn; row++)
+            {
+                for (int col = 0; col < maxRow; col++)
+                {
+                    Tuple<Owner, HashSet<(int, int)>>  cellResult = Territory((row,col));
+                    Owner owner = cellResult.Item1;
+                    
+                    foreach ((int,int) element in  cellResult.Item2)
+                    {
+                        if (!result[owner].Contains(element))
+                        {
+                            result[owner].Add(element);
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private void checkCell((int, int) itemInStudy, int varX, int varY,ref bool isValid, ref char? ownerInStudy, ref List<(int, int)> itemsToStudy)
+        {
+            if ((itemInStudy.Item1 + varX) >= 0 && 
+                (itemInStudy.Item2 + varY) >= 0 && 
+                (itemInStudy.Item1 + varX) < maxColumn && 
+                (itemInStudy.Item2 + varY) < maxRow)
+            {
+                char value = board[itemInStudy.Item2 + varY][itemInStudy.Item1 + varX];
+                if (value == ' ')
+                {
+                    itemsToStudy.Add((itemInStudy.Item1 + varX, itemInStudy.Item2 + varY));
+                }
+                else
+                {
+                    if (ownerInStudy == null)
+                    {
+                        ownerInStudy = value;
+                    }
+                    else
+                    {
+                        isValid = ownerInStudy != value ? false : isValid;
+                    }
+
+                }
+            }
+        }
+    }
 }
