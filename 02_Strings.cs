@@ -247,5 +247,41 @@ namespace Test
         }
     }
 
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Pangram
+    {
+        public static bool IsPangram(string input)
+        {
+            int[] numOfEachLetter = new int[(int)'Z' - (int)'A' +1] ;
+            input = input.ToUpper();
+            foreach (char c in input)
+            {
+                if (c >= 'A' && c <= 'Z')
+                {
+                    numOfEachLetter[c - (int)'A'] += 1;
+                }
+            }
+            return numOfEachLetter.All(x => x > 0);
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static class Isogram
+    {
+        public static bool IsIsogram(string word) => word.ToLower().Where(x => x >= 'a' && x<='z').Distinct().Count() == word.ToLower().Where(x => x >= 'a' && x<='z').Count();
+        //BETTER SOLUTION
+    //=> word.ToLower().Where(char.IsLetter).Distinct().Count() == word.ToLower().Where(char.IsLetter).Count();
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class ReverseString
+    {
+        public static string Reverse(string input) => new string(input.Reverse().ToArray());
+
+    }
 }
 
