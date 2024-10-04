@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Code
+namespace Code2
 {
     public class Orm
     {
@@ -42,6 +42,19 @@ namespace Code
             {
                 return false;
             }
+        }
+    }
+
+    //Añadido por mi para que no de errores pero esta clase no es del ejercicio
+    public class Database : IDisposable
+    {
+        public void BeginTransaction() { }
+        public void EndTransaction() { }
+        public void Write(string data) { }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }
