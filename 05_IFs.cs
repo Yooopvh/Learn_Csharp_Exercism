@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Code2;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.Intrinsics.X86;
@@ -238,6 +240,173 @@ namespace Test
             result = result.Length > 0? result[0..(result.Length-1)] : result;
             return result;
 
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static class Markdown
+    {
+        private static string Wrap(string text, string tag) => $"<{tag}>{text}</{tag}>";
+
+        private static string Parse(string markdown, string delimiter, string tag)
+        {
+            var pattern = $"{delimiter}(.+){delimiter}";
+            var replacement = $"<{tag}>$1</{tag}>";
+            return Regex.Replace(markdown, pattern, replacement);
+        }
+
+        private static string ParseText(string markdown, bool list)
+        {
+            var parsedText = Parse(markdown, "__", "strong");
+            parsedText = Parse(parsedText, "_", "em");   //Parse_(Parse__((markdown)));
+
+            return list? parsedText : Wrap(parsedText, "p");
+        }
+
+        private static string ParseHeader(string markdown, bool list, out bool inListAfter)
+        {
+            var count = 0;
+
+            for (int i = 0; i < markdown.Length; i++)
+            {
+                if (markdown[i] == '#')
+                {
+                    count += 1;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (count == 0 || count > 6)
+            {
+                inListAfter = list;
+                return null;
+            }
+
+            var headerTag = $"h{count}";
+            var headerHtml = Wrap(markdown.Substring(count + 1), headerTag);
+
+            inListAfter = false;
+            return list ? $"</ul>{headerHtml}" : headerHtml;
+        }
+
+        private static string ParseLineItem(string markdown, bool list, out bool inListAfter)
+        {
+            if (markdown.StartsWith("*"))
+            {
+                var innerHtml = Wrap(ParseText(markdown.Substring(2), true), "li");
+
+                inListAfter = true;
+                return list? innerHtml : $"<ul>{innerHtml}";
+            }
+
+            inListAfter = list;
+            return null;
+        }
+
+        private static string ParseParagraph(string markdown, bool list, out bool inListAfter)
+        {
+            inListAfter = false;
+            return list ? $"</ul>{ParseText(markdown, false)}" : ParseText(markdown, false); 
+        }
+
+        private static string ParseLine(string markdown, bool list, out bool inListAfter)
+        {
+            var result = ParseHeader(markdown, list, out inListAfter);
+
+            if (result == null)
+            {
+                result = ParseLineItem(markdown, list, out inListAfter);
+            }
+
+            if (result == null)
+            {
+                result = ParseParagraph(markdown, list, out inListAfter);
+            }
+
+            if (result == null)
+            {
+                throw new ArgumentException("Invalid markdown");
+            }
+
+            return result;
+        }
+
+        public static string Parse(string markdown)
+        {
+            var lines = markdown.Split('\n');
+            var result = "";
+            var list = false;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                var lineResult = ParseLine(lines[i], list, out list);
+                result += lineResult;
+            }
+
+            return list ? $"{result}</ul>" : result;
+        }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static class Say
+    {
+        
+        private static readonly string[] _units = new string[] {"", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+        private static readonly string[] _decenas = new string[] { "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" };
+        private static readonly string[] _elevenToNineteen = new string[] {"ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen" };
+        private static readonly string[] _scale = new string[] {"", "thousand ", "million ", "billion " };
+        
+
+        public static string InEnglish(long number)
+        {
+            string result = "";
+
+            if (number < 0 || number > 999999999999) throw new ArgumentOutOfRangeException();
+            else if (number == 0) return "zero";
+
+            string strNumber = number.ToString();
+            string auxStrNumber = strNumber;
+            List<long> list = new List<long>();
+            
+            while (auxStrNumber.Length > 0)
+            {
+                Int64.TryParse(auxStrNumber[Math.Max(auxStrNumber.Length - 3,0)..(auxStrNumber.Length)], out long num);
+                list.Add(num);
+                auxStrNumber = auxStrNumber.Remove(Math.Max(auxStrNumber.Length - 3, 0));
+            }
+
+            for (int i = list.Count - 1; i >= 0; i--)  
+            {
+                string scale = list[i] > 0 ? _scale[i] : "";
+                result += $"{stringizeNumberUnderThousand(list[i])} {scale}";
+            };
+
+            result = result.Trim();
+            result = result.EndsWith('-') ? result[0..(result.Length-1)] : result;
+            return result;
+        }
+
+        private static string stringizeNumberUnderThousand(long number)
+        {
+            if (number > 999) throw new Exception("The value can´t be higher than 999.");
+            int centenas = number >= 100 ? (int)(number - number%100)/100:0;
+            number -= centenas*100;
+            int decenas = number >= 10 ? (int)(number - number%10)/10 : 0;
+            number -= decenas*10;
+            int unidades = (int)number;
+
+            string strCentenas = centenas > 0 ? $"{_units[centenas]} hundred" : "";
+            string strDecenas = decenas > 1 ? $"{_decenas[decenas - 1]}-" : "";
+            string strUnidades = decenas == 1? _elevenToNineteen[unidades] : _units[unidades];
+
+            return $"{strCentenas} {strDecenas}{strUnidades}".Trim();
         }
     }
 }
