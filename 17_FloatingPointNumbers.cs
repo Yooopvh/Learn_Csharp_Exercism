@@ -69,4 +69,30 @@ namespace Code
             return (decimal)groupsOptimum.Select(x => x*8*(1-discounts[x-1])).Sum();
         }
     }
+
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class BankAccount
+    {
+
+        private bool accountOpen = false; //Por defecto la cuenta está cerrada.
+        private decimal accountMoney = 0;
+        private object balanceLock = new object();
+
+        public void Open() => accountOpen = true;
+
+        public void Close() => accountOpen = false;
+
+        public decimal Balance { get => !accountOpen? throw new InvalidOperationException(): accountMoney; }
+
+        public void UpdateBalance(decimal change)
+        {
+            lock (balanceLock)
+            {
+                accountMoney += change;
+            }
+
+        }
+    }
 }
