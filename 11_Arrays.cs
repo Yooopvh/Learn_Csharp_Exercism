@@ -59,4 +59,29 @@ namespace Test
             return numOfBussyDays;
         }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class AllYourBase
+    {
+        public static int[] Rebase(int inputBase, int[] inputDigits, int outputBase)
+        {
+            if (inputBase <= 1 || outputBase <= 1) throw new ArgumentException();
+            if (inputDigits.Any(x => x < 0) || inputDigits.Any(x => x >= inputBase)) throw new ArgumentException();
+            int value = 0;
+            for (int i = inputDigits.Length - 1; i >= 0; i--) { 
+                value += inputDigits[i] * (int) Math.Pow(inputBase,inputDigits.Length - 1 -i);
+            }
+            int digitsNeeded = 1;
+            while (Math.Pow(outputBase, digitsNeeded) <= value) digitsNeeded++;
+            int[] result = new int[digitsNeeded];
+            for (int i = digitsNeeded-1; i >= 0; i--)
+            {
+                int actualDigit = (int)((value/Math.Pow(outputBase, i) - value %Math.Pow(outputBase, i)/Math.Pow(outputBase,i)));
+                result[digitsNeeded - 1 - i] = actualDigit;
+                value -= (int) (actualDigit * Math.Pow(outputBase,i));
+            }
+            return result;
+        }
+    }
 }
