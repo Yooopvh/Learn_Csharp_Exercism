@@ -85,4 +85,109 @@ namespace Code
        
     }
 
+    //----------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public class Clock : IEquatable<Clock>
+    {
+        private int _hours;
+        private int _minutes;
+
+        public Clock(int hours, int minutes)
+        {
+            int auxHours = (hours + (minutes - (minutes%60))/60)%24;
+            _hours = auxHours < 0 ? 24 + auxHours : auxHours ;
+            if (minutes%60 < 0)
+            {
+                _minutes = 60 + minutes%60;
+                _hours = _hours - 1;
+            } else
+            {
+                _minutes = minutes % 60;
+            }
+        }
+
+        public Clock Add(int minutesToAdd)
+        {
+            int resultMinutes = (_minutes + minutesToAdd)%60;
+            int resultHours = (_hours + (_minutes+minutesToAdd - (_minutes+minutesToAdd)%60)/60)%24;
+            return new Clock(resultHours, resultMinutes);
+        }
+
+        public bool Equals(Clock? other) => (_hours == other._hours && _minutes == other._minutes);
+
+        public Clock Subtract(int minutesToSubtract)
+        {
+            int resultMinutes = (_minutes - minutesToSubtract)%60 < 0 ? 60 + (_minutes - minutesToSubtract)%60 : (_minutes - minutesToSubtract)%60;
+            int hoursToSubstract = (_minutes-minutesToSubtract - (_minutes-minutesToSubtract)%60)/60;
+            hoursToSubstract = _minutes-minutesToSubtract < 0? hoursToSubstract - 1 : hoursToSubstract ;
+            int resultHours = (_hours + hoursToSubstract)%24;
+            return new Clock(resultHours, resultMinutes);
+        }
+
+        public override string ToString()
+        {
+            return $"{_hours:00}:{_minutes:00}";
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum Classification
+    {
+        Perfect,
+        Abundant,
+        Deficient
+    }
+
+    public static class PerfectNumbers
+    {
+        public static Classification Classify(int number)
+        {
+            if (number <= 0) throw new ArgumentOutOfRangeException("number");
+            int aliquotSum = 0;
+            for (int i = 1; i <= number/2; i++) 
+            {
+                aliquotSum += number%i==0 ? i : 0;
+            }
+
+            if (aliquotSum == number) return Classification.Perfect;
+            else if (aliquotSum > number) return Classification.Abundant;
+            else return Classification.Deficient;
+        }
+    }
+
+    // COMUNITY SOLUTION
+    //public enum Classification
+    //{
+    //    Perfect = 0,
+    //    Abundant = 1,
+    //    Deficient = -1
+    //}
+    //public static class PerfectNumbers
+    //{
+    //    public static Classification Classify(int number) =>
+    //        (Classification)Enumerable.Range(1, number - 1).Where(i => number % i == 0).Sum().CompareTo(number);
+    //}
+
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class SumOfMultiples
+    {
+        public static int Sum(IEnumerable<int> multiples, int max)
+        {
+            HashSet<int> values = new HashSet<int>();
+
+            foreach (int multiple in multiples.Where(x =>x != 0))
+            {
+                for (int i = multiple; i<=max; i += multiple)
+                {
+                     values.Add(i);
+                }
+            }
+
+            return values.Sum();
+        }
+    }
 }
