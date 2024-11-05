@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -84,4 +85,90 @@ namespace Test
             return result;
         }
     }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class OcrNumbers
+    {
+        private static readonly Dictionary<string,int> numberCodes = new Dictionary<string, int>()
+        {
+            {" _ \n| |\n|_|\n   ",0 },
+            {"   \n  |\n  |\n   ",1 },
+            {" _ \n _|\n|_ \n   ",2 },
+            {" _ \n _|\n _|\n   ",3 },
+            {"   \n|_|\n  |\n   ",4 },
+            {" _ \n|_ \n _|\n   ",5 },
+            {" _ \n|_ \n|_|\n   ",6 },
+            {" _ \n  |\n  |\n   ",7 },
+            {" _ \n|_|\n|_|\n   ",8 },
+            {" _ \n|_|\n _|\n   ",9 }
+        };
+
+        public static string Convert(string input)
+        {
+            char[]inputPerLines = input.ToCharArray();
+            int row = 0;
+            int col = 0;
+
+            //Get a matrix of characters 
+            int numRows = input.ToCharArray().Count(x => x == '\n')+1;
+            int numColumns = input.Split('\n')[0].ToCharArray().Count();
+            if (numRows%4 != 0) throw new ArgumentException();
+            if (numColumns%3 != 0) throw new ArgumentException();
+
+            char[,] charMatrix = new char[numRows,numColumns];
+            foreach (char c in inputPerLines)
+            {
+                if (c == '\n')
+                {
+                    row++;
+                    col = 0;
+                } else
+                {
+                    charMatrix[row, col] = c;
+                    col++;
+                }
+            }
+
+            List<string> stringsToDecode = new List<string>();
+            int actualRow = 0;
+            int actualCol = 0;
+            //Divide that characters into groups of 4 by 3.
+            for (int auxRow = 0; auxRow < numRows; auxRow += 4)
+            {
+                while (actualCol < numColumns)
+                {
+                    string numberCodedString = "";
+                    for (int i = 0+auxRow; i < auxRow + 4; i++)
+                    {
+                        for (int auxCol = actualCol; auxCol < actualCol + 3; auxCol++)
+                        {
+                            numberCodedString += charMatrix[i, auxCol].ToString();
+                        }
+                        numberCodedString += '\n';
+
+                    }
+
+                    stringsToDecode.Add(numberCodedString[0..(numberCodedString.Length - 1)]);
+                    actualCol += 3;
+                }
+                actualCol = 0;
+                stringsToDecode.Add(",");
+            }
+
+            stringsToDecode.RemoveAt(stringsToDecode.Count - 1);
+
+            //Decode the srings
+            string result = "";
+            foreach (string numberCodedString in stringsToDecode)
+            {
+                if (numberCodes.ContainsKey(numberCodedString)) result += numberCodes[numberCodedString].ToString();
+                else if (numberCodedString == ",") result += numberCodedString;
+                else result += "?";
+            }
+
+            return result;
+        }
+    }
+
 }
