@@ -478,4 +478,93 @@ namespace Test
         }
     }
 
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class CustomSet : IEquatable<CustomSet> 
+    {
+        int[] _values;
+        public CustomSet(params int[] values)
+        {
+            _values = values;
+        }
+
+        public CustomSet Add(int value)
+        {
+            CustomSet result = new CustomSet(_values);
+            if (!_values.Contains(value))
+            {
+                Array.Resize(ref result._values, _values.Length+1);
+                result._values[_values.Length] = value;
+            }
+            return result;
+        }
+
+        public bool Empty() => _values.Count() == 0;
+
+
+        public bool Contains(int value) => _values.Contains(value);
+
+        public bool Subset(CustomSet right)
+        {
+            bool result = true;
+            foreach (int value in _values)
+            {
+                if (!right._values.Contains(value)) result = false;
+            };
+            return result;
+        }
+
+        public bool Disjoint(CustomSet right)
+        {
+            bool result = true;
+            foreach (int value in right._values)
+            {
+                if (_values.Contains(value)) result = false;
+            };
+            return result;
+        }
+
+        public CustomSet Intersection(CustomSet right)
+        {
+            CustomSet result = new CustomSet();
+            foreach (int value in right._values)
+            {
+                if (_values.Contains(value))
+                {
+                    result = result.Add(value);
+                }
+            }
+            return result;  
+        }
+
+        public CustomSet Difference(CustomSet right)
+        {
+            CustomSet result = new CustomSet();
+            foreach (int value in _values)
+            {
+                if (!right._values.Contains(value))
+                {
+                    result = result.Add(value);
+                }
+            }
+            return result;
+        }
+
+        public CustomSet Union(CustomSet right)
+        {
+            CustomSet result = new CustomSet(_values);
+            foreach (int value in right._values)
+            {
+                if (!_values.Contains(value))
+                {
+                    result = result.Add(value);
+                }
+            }
+            return result;
+        }
+
+        public bool Equals(CustomSet? other) => _values.OrderBy(x => x).ToArray().SequenceEqual(other._values.OrderBy(x => x).ToArray());
+
+    }
 }
