@@ -216,4 +216,95 @@ namespace Code
             return numbers.Sum(x => x)%10 == 0 && (numbers.Sum(x =>x) > 0 || numbers.Count() > 1);
         }  
     }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class AffineCipher
+    {
+        public static string Encode(string plainText, int a, int b)
+        {
+            if (!AreCoprime(a)) throw new ArgumentException();
+
+            plainText = plainText.ToLower();
+            string result = string.Empty;
+            int auxCounter = 0;
+            foreach (char c in plainText)
+            {
+                if (c >= 'a' && c <='z')
+                {
+                    int charIndex = (int)c - (int)'a';
+                    result += (char)( 'a' + (double)(a * charIndex + b)%26);
+                    auxCounter++;
+                } else if (c >= '0' && c <= '9')
+                {
+                    result += c;
+                    auxCounter++;
+                } 
+
+                if (auxCounter == 5)
+                {
+                    auxCounter = 0;
+                    result += ' ';
+                }
+
+            }
+            return result.Trim();
+        }
+
+        public static string Decode(string cipheredText, int a, int b)
+        {
+            if (!AreCoprime(a)) throw new ArgumentException();
+            
+            string result = string.Empty;
+            int mmc = getModularMultiplicativeInverse(a);
+
+            foreach (char c in cipheredText)
+            {
+                if (c >= 'a' && c <= 'z')
+                {
+                    int charIndex = (int)c - (int)'a';
+                    charIndex = (mmc*(charIndex-b))%26;
+                    if (charIndex < 0)
+                    {
+                        result += (char)('z' + charIndex+1);
+                    } else
+                    {
+                        result += (char)('a' + charIndex );
+                    }
+
+                }
+                else if (c != ' ')
+                {
+                    result += c;
+                }
+            }
+
+            return result;
+        }
+
+        private static bool AreCoprime(int a) 
+        { 
+            for (int i = 2; i <= a; i++) 
+            { 
+                if (a % i == 0 && 26 % i == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static int getModularMultiplicativeInverse(int a)
+        {
+            for(int i = 0; i <= 26; i++)
+            {
+                if (a*i % 26 == 1)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+    }
 }
