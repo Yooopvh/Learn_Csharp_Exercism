@@ -169,7 +169,72 @@ namespace Test
 
             First = newValue;
         }
-        
+
     }
 
+
+    //------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class CircularBuffer<T> //: Queue<T>
+    {
+        private int _writeIndex = 0;
+        private int _readIndex = 0;
+        private int _capacity;
+        private (T,bool)[] _buffer;
+
+        public CircularBuffer(int capacity)
+        {
+            _buffer = new (T,bool)[capacity];
+            _capacity = capacity;
+        }  
+
+        public T Read(){
+            T? result = _buffer[_readIndex].Item2 is not false ? _buffer[_readIndex].Item1 : throw new InvalidOperationException();
+            _buffer[_readIndex].Item2 = false ;
+            _readIndex = (_readIndex + 1) % _capacity;
+            return result;
+        } 
+
+        public void Write(T value)
+        {
+            _buffer[_writeIndex] = _buffer[_writeIndex].Item2 is true ? throw new InvalidOperationException() : (value,true) ;
+            _writeIndex = (_writeIndex + 1) % _capacity;
+        }
+
+        public void Overwrite(T value)
+        {
+            if(_writeIndex == _readIndex)
+            {
+                _readIndex = (_readIndex + 1)%_capacity;
+            }
+            _buffer[_writeIndex] = (value, true);
+            _writeIndex = (_writeIndex + 1) % _capacity;
+        }
+
+        public void Clear()
+        {
+            _readIndex = 0;
+            _writeIndex = 0;
+            _buffer = new (T, bool)[_capacity];
+        }
+    }
+
+    //  SOLUCIÓN COMUNIDAD --> Utiliza el tipo 
+    //public class CircularBuffer<T> : Queue<T>
+    //{
+    //    private readonly int Capacity;
+
+    //    public CircularBuffer(int capacity) => Capacity = capacity;
+    //    public T Read() => Count == 0 ? throw new InvalidOperationException() : Dequeue();
+    //    public void Write(T value)
+    //    {
+    //        if (Count == Capacity) throw new InvalidOperationException();
+    //        Enqueue(value);
+    //    }
+    //    public void Overwrite(T value)
+    //    {
+    //        if (Count == Capacity) Dequeue();
+    //        Enqueue(value);
+    //    }
+    //}
 }

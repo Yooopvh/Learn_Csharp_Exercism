@@ -8,7 +8,7 @@ class Exercise2
     
     public static void Main(string[] args)
     {
-
+        
         //Location estaLocation = new Location("Santurdejo");
 
         //Console.WriteLine(estaLocation.Name);
