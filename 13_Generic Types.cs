@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
@@ -237,4 +238,109 @@ namespace Test
     //        Enqueue(value);
     //    }
     //}
+
+
+
+    //------------------------------------------------------------------------------------------------------------------------------------------
+
+    public class SimpleLinkedList<T> : IEnumerable<T>
+    {
+        private SimpleLinkedListEnumerator<T> _song;
+        public int Count { get; private set; } = 0;
+
+        public SimpleLinkedList()
+        {
+            _song = new SimpleLinkedListEnumerator<T> ();
+        }
+
+        public SimpleLinkedList( T value)
+        {
+            _song = new SimpleLinkedListEnumerator<T>();
+            _song.Add(value);
+            Count++;
+        }
+
+        public SimpleLinkedList( IEnumerable<T> values)
+        {
+            _song = new SimpleLinkedListEnumerator<T>();
+            foreach (T value in values)
+            {
+                _song.Add(value);
+                Count++;
+            }
+        }
+
+        public void Push(T value)
+        {
+            _song.Add(value);
+            Count++;
+        }
+
+        public T Pop()
+        {
+            _song.MoveNext();
+            Count--;
+            return _song.Current;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            while (_song.MoveNext())
+            {
+                yield return _song.Current;
+            }; //return new SimpleLinkedListEnumerator<T>();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+    }
+
+    public class SimpleLinkedListEnumerator<T> : IEnumerator<T> 
+    {
+        public T songID;
+        public SimpleLinkedListEnumerator<T> actualSong = null;
+        public SimpleLinkedListEnumerator<T> original = null;
+
+        public SimpleLinkedListEnumerator() { }
+
+        public void Add(T value)
+        {
+            songID=value;
+            actualSong = new SimpleLinkedListEnumerator<T>(this);
+            original = actualSong;
+        }
+
+        private SimpleLinkedListEnumerator(SimpleLinkedListEnumerator<T> element)
+        {
+            songID = element.songID;
+            actualSong = element.actualSong;
+        }
+
+        public T Current => songID;
+
+        object IEnumerator.Current => songID;
+
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+        }
+
+        public bool MoveNext()
+        {
+            if (actualSong == null) return false;
+            songID = actualSong.songID;
+            actualSong = actualSong.actualSong;
+            return true;
+        }
+
+        public void Reset()
+        {
+            songID = original.songID;
+            actualSong = original.actualSong;
+        }
+
+    }
 }
