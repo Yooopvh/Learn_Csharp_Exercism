@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -144,5 +145,77 @@ namespace Code
             return result%11 == 0 && multiplier == 0;
         }
     }
+
+    //----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+    public static class Minesweeper
+    {
+        public static string[] Annotate(string[] input)
+        {
+            int numRows = input.Length;
+            if (numRows == 0) return input;
+            int numCols = input[0].Length;
+            char[][] matrixInput = input.ToList().Select(x => x.ToCharArray()).ToArray();
+            for (int rowIndex = 0;rowIndex < numRows;rowIndex++)
+            {
+                for (int columnIndex = 0; columnIndex < numCols; columnIndex++)
+                {
+                    int numMinesArround = 0;
+                    for (int subRowIndex = -1; subRowIndex < 2; subRowIndex++)
+                    {
+                        for (int subColumnIndex = -1; subColumnIndex < 2; subColumnIndex++)
+                        {
+                            if (subRowIndex == 0 && subColumnIndex == 0) continue;
+                            if (rowIndex + subRowIndex < 0 ||
+                                rowIndex + subRowIndex >= numRows ||
+                                columnIndex + subColumnIndex < 0 ||
+                                columnIndex + subColumnIndex >= numCols) continue;
+                            if (matrixInput[rowIndex + subRowIndex][columnIndex + subColumnIndex] == '*') numMinesArround++;
+                        }
+                    }
+                    matrixInput[rowIndex][columnIndex] = (matrixInput[rowIndex][columnIndex] == ' ' && numMinesArround > 0) ? (char) ('0' +numMinesArround) : matrixInput[rowIndex][columnIndex];
+                }
+            }
+
+            var opopo = matrixInput.Select(x => string.Concat(x)).ToArray();
+            return matrixInput.Select(x => string.Concat(x)).ToArray();
+        }
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Diamond
+    {
+        public static string Make(char target)
+        {
+            int numLetters = (int)(target - 'A' + 1);
+            string lettersArray = new string(Enumerable.Range('A', numLetters).Select(i => (char)i).ToArray());
+            string result = string.Empty;
+
+            // Rows
+            for (int i=0; i < lettersArray.Length; i++) 
+            {
+                string rowResult = string.Empty;
+                char  c = lettersArray[i];
+                rowResult += new string(' ',numLetters - i -1) + c + new string(' ',i);
+                rowResult = rowResult.Reverse().Skip(1).Aggregate(rowResult,(result,x) => result += x);
+                result += rowResult + "\n";
+            }
+
+            for (int i = (lettersArray.Length - 2); i >= 0; i--)
+            {
+                string rowResult = string.Empty;
+                char c = lettersArray[i];
+                rowResult += new string(' ', numLetters - i -1) + c + new string(' ', i);
+                rowResult = rowResult.Reverse().Skip(1).Aggregate(rowResult, (result, x) => result += x);
+                result += rowResult + "\n";
+            }
+
+            return result.Substring(0, result.Length - 1);
+        }
+    }
+
 
 }
