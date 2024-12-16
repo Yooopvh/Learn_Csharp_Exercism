@@ -86,6 +86,7 @@ namespace Test
 
     }
 
+    //--------------------------------------------------------------------------------------------------------------------------------------------
 
     public static class PrimeFactors
     {
@@ -106,6 +107,90 @@ namespace Test
                 }
             }
             return result.ToArray();
+        }
+    }
+
+    //---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class VariableLengthQuantity
+    {
+        public static uint[] Encode(uint[] numbers)
+        {
+            List<uint> allValues = new List<uint>();
+            foreach (uint number in numbers)
+            {
+                if (number == 0)
+                {
+                    allValues.Add(0);
+                    continue;
+                }
+                List<uint> values = new List<uint>();
+                uint auxNumber = number;
+                while (auxNumber > 0)
+                {
+                    // Obtenemos los 7 últimos bits
+                    values.Add(auxNumber & 0b_111_1111);
+                    auxNumber >>= 7;
+                }
+
+                uint mask = 0b_0000_0000;
+                for (int i = 0; i < values.Count; i++)
+                {
+                    values[i] |= mask;
+                    mask = 0b_1000_0000;
+
+                }
+
+                allValues.AddRange(values.ToArray().Reverse());
+            }
+
+            return allValues.ToArray();
+        }
+
+        public static uint[] Decode(uint[] bytes)
+        {
+            List<uint> allValues = new List<uint>();
+            uint decodedNumber = 0;
+            bool isLast = false;    
+            foreach (uint number in bytes)
+            {
+                if (number > 0xFF) throw new InvalidOperationException();
+                isLast = (number & 0b_1000_0000) == 0? true : false;
+                uint numberWithoutFlag = number & 0b_0111_1111;
+                decodedNumber <<= 7;
+                decodedNumber |= numberWithoutFlag;
+                
+                if (isLast)
+                {
+                    allValues.Add(decodedNumber);
+                    decodedNumber = 0;
+                }
+            }
+
+            if (!isLast ) throw new InvalidOperationException(); 
+
+            return allValues.ToArray();
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class LargestSeriesProduct
+    {
+        public static long GetLargestProduct(string digits, int span)
+        {
+            if (span > digits.Length || span < 0) throw new ArgumentException();
+            List<int> values = digits.ToCharArray().Select(x => (int)x - (int)'0').ToList();
+            if (values.Any(x => x > 9 || x < 0)) throw new ArgumentException();
+            int maxResult = 0;
+            for (int i = 0; i <= digits.Length - span;  i++)
+            {
+                List<int> studyRange = values.GetRange(i, span);
+                int result = 1;
+                foreach (int value in studyRange) result *= value;
+                if (result > maxResult) maxResult = result;
+            }
+            return maxResult;
         }
     }
 }
