@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Code
@@ -106,5 +107,148 @@ namespace Code
                     throw new ArgumentException();
             }
         }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class Wordy
+    {
+        public static int Answer(string question)
+        {
+            int[] numbers = Regex.Matches(question,@"-?\d+").Select(v => Int32.Parse(v.Value)).ToArray();
+            //string[] operations = Regex.Matches(question, @"\d (plus|minus|divided by|multiplied by)+").Select(v => v.Value).ToArray();
+            string[] operations = Regex.Matches(question, @"(?<=\d)( [a-z]* ?[a-z]*)")
+                                        .Cast<Match>()
+                                        .Select(v => v.Groups[1].Value)
+                                        .ToArray();
+
+            if (numbers.Length == 0 || numbers.Length -1 != operations.Length) throw new ArgumentException();
+
+            for (int i = 0; i < numbers.Length - 1; i++)
+            {
+                switch (operations[i].Trim())
+                {
+                    case "plus":
+                        numbers[i+1] = numbers[i] + numbers[i+1]; 
+                        break;
+                    case "minus":
+                        numbers[i+1] = numbers[i] - numbers[i+1];
+                        break;
+                    case "divided by":
+                        numbers[i+1] = numbers[i] / numbers[i+1];
+                        break;
+                    case "multiplied by":
+                        numbers[i+1] = numbers[i] * numbers[i+1];
+                        break;
+                    default: throw new ArgumentException();
+                }
+            }
+
+            return numbers.Last();
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public enum ConnectWinner
+    {
+        White,
+        Black,
+        None
+    }
+
+    public class Connect
+    {
+        private string[] _cleanInput;
+        private ConnectWinner _result = ConnectWinner.None;
+        private int _numRows;
+        private int _numCols;
+        public Connect(string[] input)
+        {
+            _cleanInput = input.Select(s => s.Replace(" ","")).ToArray();
+
+            _numRows = _cleanInput.Length;
+            _numCols = _cleanInput[0].Length;
+
+            // Check O
+            char player = 'O';
+            ConnectWinner result;
+            for (int j = 0;j < _numCols;j++)
+            {
+                result = checkNext(0, j, player, new List<(int, int)>());
+                if (result != ConnectWinner.None) 
+                {
+                    _result = result; 
+                    break;
+                }
+            }
+
+            // Check X
+            player = 'X';
+            if (_result == ConnectWinner.None)
+            {
+                for (int i = 0; i < _numRows; i++)
+                {
+                    result = checkNext(i, 0, player, new List<(int, int)>());
+                    if (result != ConnectWinner.None) _result = result;
+                }
+            }
+
+        }
+
+        public ConnectWinner Result() => _result;
+
+        private ConnectWinner checkNext(int actualRow, int actualColumn, char player, List<(int,int)> alreadyChecked)
+        {
+            if (!alreadyChecked.Contains((actualRow, actualColumn)) && _cleanInput[actualRow][actualColumn] == player)
+            {
+                List<(int,int)> newList = new List<(int,int)> (alreadyChecked);
+                newList.Add((actualRow, actualColumn));
+                if (actualRow + 1 == _numRows && _cleanInput[actualRow][actualColumn] == 'O' && player == 'O') return ConnectWinner.White;
+                if (actualColumn + 1 == _numCols && _cleanInput[actualRow][actualColumn] == 'X' && player == 'X') return ConnectWinner.Black;
+                ConnectWinner result;
+                if (actualRow > 0)
+                {
+                    if (_cleanInput[actualRow-1][actualColumn] == player)
+                    {
+                        result = checkNext(actualRow-1, actualColumn, player,newList);
+                        if (result != ConnectWinner.None) return result;
+                    };
+                    if (actualColumn < _numCols - 1 && _cleanInput[actualRow-1][actualColumn+1] == player)
+                    {
+                        result = checkNext(actualRow-1, actualColumn+1, player, newList);
+                        if (result != ConnectWinner.None) return result;
+                    };
+                }
+                if (actualRow < _numRows-1)
+                {
+                    if (actualColumn > 0 && _cleanInput[actualRow+1][actualColumn - 1] == player)
+                    {
+                        result = checkNext(actualRow+1, actualColumn-1, player, newList);
+                        if (result != ConnectWinner.None) return result;
+                    };
+
+                    if (_cleanInput[actualRow+1][actualColumn] == player)
+                    {
+                        result = checkNext(actualRow+1, actualColumn, player, newList);
+                        if (result != ConnectWinner.None) return result;
+                    };
+                }
+                if (actualColumn > 0 && _cleanInput[actualRow][actualColumn - 1] == player)
+                {
+                    result = checkNext(actualRow, actualColumn -1, player, newList);
+                    if (result != ConnectWinner.None) return result;
+                };
+                if (actualColumn < _numCols - 1 && _cleanInput[actualRow][actualColumn + 1] == player)
+                {
+                    result = checkNext(actualRow, actualColumn + 1, player, newList);
+                    if (result != ConnectWinner.None) return result;
+                };
+            }
+            
+
+            return ConnectWinner.None;
+        }
+
     }
 }
