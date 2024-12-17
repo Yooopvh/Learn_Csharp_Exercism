@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Code
@@ -376,4 +377,43 @@ namespace Code
             }
         }
     }
+
+    //-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    public static class WordCount
+    {
+        public static IDictionary<string, int> CountWords(string phrase)
+        {
+            phrase = phrase.ToLower();
+            List<char> allCharactersInPhrase = phrase.ToCharArray().Distinct().ToList();
+            char[] separators = allCharactersInPhrase.Where(c => !(char.IsLetterOrDigit(c) || c == '\'')).ToArray();
+            List<string> phraseSplited = phrase.Split(separators).ToList();
+            // Elimina ' si está al principio o final de la frase
+            phraseSplited = phraseSplited.Select(s => s.StartsWith("'") ? s.Substring(1) : s).ToList();
+            phraseSplited = phraseSplited.Select(s => s.EndsWith('\'') ? s.Substring(0, s.Length - 1) : s).ToList();
+
+            phraseSplited.RemoveAll(s => s =="");
+
+
+            Dictionary<string, int> resultDictionary = new Dictionary<string, int>();
+            foreach (string word in phraseSplited)
+            {
+                if (!resultDictionary.ContainsKey(word)) resultDictionary[word] = 0;
+                resultDictionary[word]++;
+            }
+
+            return resultDictionary;
+        }
+    }
+
+    // Better solution
+    //public static class WordCount
+    //{
+    //    public static Dictionary<string, int> CountWords(string phrase) =>
+    //        phrase.Words()
+    //            .GroupBy(w => w.ToLowerInvariant())
+    //            .ToDictionary(g => g.Key, g => g.Count());
+    //    private static IEnumerable<string> Words(this string phrase) =>
+    //        Regex.Matches(phrase, @"\w+('\w+)*").Select(m => m.Value);
+    //}
 }
